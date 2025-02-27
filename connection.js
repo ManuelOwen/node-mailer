@@ -27,5 +27,6 @@ document.getElementById('messageForm').addEventListener('submit', async (event) 
         }
     } catch (error) {
         alert('Failed to send you email!.');
+        console.log(error)
     }
 });

@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 
@@ -11,27 +10,32 @@ app.use(cors({
     origin: '*'
 }));
 
-const send = async (from, to, subject, body) => {
+const sendEmail = async (to, subject, body) => {
     try {
         const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host:'mail.highlandpathfinders.co.ke',
+            port: 465 , // Ensure port is a number
+            secure:true,  // `true` for 465, `false` for others
             auth: {
                 user: process.env.EMAIL_USER,
                 pass: process.env.EMAIL_PASS
-            }
+            },
+            requireTLS: true,  // Force TLS if needed
+            tls: {
+                rejectUnauthorized: false  // Avoid SSL issues (try removing if it works without)
+            },
+            debug: true  // Enable debugging
         });
 
         const mailOptions = {
-            from: `no-reply@${from}`,
+            from: `"info@highlandpathfinders.co.ke" <${process.env.EMAIL_USER}>`, 
             to,
             subject,
             text: body,
-            html: `<h3>${subject}</h3><p>${body}</p>`,
-            replyTo: `no-reply@${from}`,
+            html: `<h3>${subject}</h3><p>${body}</p>`
         };
 
         const info = await transporter.sendMail(mailOptions);
-
         return info;
 
     } catch (err) {
@@ -42,18 +46,20 @@ const send = async (from, to, subject, body) => {
 app.post('/email', async (req, res) => {
     try {
         console.log(req.body);
-        user = process.env.EMAIL_USER;
         const { name, email, subject, message } = req.body;
+
         if (!name || !email || !subject || !message) {
-            res.status(400).json({ message: "All field are required!" });
+            return res.status(400).json({ message: "All fields are required!" });
         }
-        const result = await send(user, email, subject, message);
-        if (result) {
-            res.status(200).json(result);
-        }
+
+        const result = await sendEmail(email, subject, message);
+
+        res.status(200).json({ success: true, message: "Email sent successfully", result });
+
     } catch (error) {
-        console.log(error);
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
     }
-})
+});
 
 app.listen(3000, () => console.log('Server started on port 3000'));
