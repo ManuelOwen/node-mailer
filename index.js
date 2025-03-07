@@ -61,8 +61,8 @@ app.post('/email', async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
     }
 });
-app .get('/email', (req, res) => {
-    res.send('his is nodemailer, Welcome!')
+app .get('/', (req, res) => {
+    res.send('This is nodemailer, Welcome!')
 });
 const PORT = process.env.PORT || 3000;
 
