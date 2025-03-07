@@ -61,5 +61,11 @@ app.post('/email', async (req, res) => {
         res.status(500).json({ success: false, message: "Failed to send email", error: error.message });
     }
 });
+app .get('/email', (req, res) => {
+    res.send('his is nodemailer, Welcome!')
+});
+const PORT = process.env.PORT || 3000;
 
-app.listen(3000, () => console.log('Server started on port 3000'));
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server running on port  ${PORT}`);
+})
